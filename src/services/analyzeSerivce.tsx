@@ -3,12 +3,13 @@ import { TestDTO } from "../DTO/TestDTO";
 import { ProblemDTO } from "../DTO/ProblemDTO";
 import parseErrorStack from "react-native/Libraries/Core/Devtools/parseErrorStack";
 import { Alert } from "react-native";
+import { ParseResultDTO } from "../DTO/ParseResultDTO";
 
 export default function useAnalyzeService() {
 
   const [analysisResult, setAnalysisResult] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [parseResult, setParseResult] = useState<any>(null);
+  const [parseResult, setParseResult] = useState<ParseResultDTO>();
 
   const parseAnalysisResult = (analysisResult: string): { test: TestDTO; problems: ProblemDTO[] } => {
     try {
@@ -83,7 +84,7 @@ export default function useAnalyzeService() {
 
       // Push the last accumulated problem if valid
       pushIfValid();
-      
+
       return { test: { test_name }, problems };
     }
     catch {

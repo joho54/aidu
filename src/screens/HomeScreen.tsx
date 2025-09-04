@@ -4,6 +4,8 @@ import { launchImageLibrary, Asset } from "react-native-image-picker";
 import { DataInputType, getText } from 'rn-ocr-lib'
 import useAnalyzeService from "../services/analyzeSerivce"; // DEBUG: {useAnalyzeService} -> useAnalyzeService. default export 방식은 이렇게 해야함.
 import { useImagePicker } from "../hooks/useImagePicker";
+import { saveParseResult } from "../services/databaseService";
+
 
 export default function HomeScreen() {
     const [processedText, setProcessedText] = useState('');
@@ -52,7 +54,14 @@ export default function HomeScreen() {
             <View>
                 <Button
                     title={'시험 저장하기'}
-                    onPress={()=>saveTest(analysisResult)}
+                    onPress={() => {
+                        if (parseResult) {
+                            saveParseResult(parseResult);
+                        } else {
+                            Alert.alert('분석 결과가 없습니다.');
+                        }
+                    }}
+                    disabled={!parseResult}
                 />
             </View>
         </ScrollView>

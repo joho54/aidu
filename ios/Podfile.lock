@@ -2382,6 +2382,8 @@ PODS:
     - React-Codegen
     - React-Core
     - ReactCommon/turbomodule/core
+  - RNFS (2.20.0):
+    - React-Core
   - RNGestureHandler (2.28.0):
     - boost
     - DoubleConversion
@@ -2549,6 +2551,7 @@ DEPENDENCIES:
   - ReactCodegen (from `build/generated/ios`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - rn-ocr-lib (from `../node_modules/rn-ocr-lib`)
+  - RNFS (from `../node_modules/react-native-fs`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - SocketRocket (~> 0.7.1)
@@ -2711,6 +2714,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   rn-ocr-lib:
     :path: "../node_modules/rn-ocr-lib"
+  RNFS:
+    :path: "../node_modules/react-native-fs"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
   RNScreens:
@@ -2795,6 +2800,7 @@ SPEC CHECKSUMS:
   ReactCodegen: 3baedb0c33f963250c866151b825a3c5194b12f1
   ReactCommon: e897f9a1b4afab370cfefaaf5fb3c80371bc3937
   rn-ocr-lib: c649d5823138937409179654478103ac4e076621
+  RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNGestureHandler: 4f7cc97a71d4fe0fcba38c94acdd969f5f17c91c
   RNScreens: 5c7f22b19ee2e900e5de2c578471aeb153d1e502
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
