@@ -138,3 +138,51 @@ export const saveParseResult = async (parseResult: ParseResultDTO) => {
         throw error;
     }
 }
+
+// 새로 추가: 저장된 시험 목록 조회
+export const getAllTests = async () => { 
+    // db 객체 열기 (클라이언트랑 비슷한 느낌. 하지만 다름)
+    const db = await openDatabase();
+    // sql 쿼리 
+    const sql = 'SELECT test_id, test_name, total_problems, correct_problems FROM Tests ORDER BY test_id DESC';
+    // db 클라이언트를 통해 쿼리를 날리고 응답을 받음.
+    const res = await db.executeSql(sql);
+    // 결과 배열의 첫 번째 요소에 rows가 포함되기 때문
+    const rows = res?.[0]?.rows;
+    // 배열의 각 요소를 problem 형식에 맞춰서 찾도록 타입 정의
+    const items = [] as Array<{ test_id: number; test_name: string; total_problems: number; correct_problems: number }>;
+    // 각 엔티티를 items에 삽입
+    for (let i = 0; i < rows.length; i++) {
+        items.push(rows.item(i));
+    }
+    return items;
+};
+
+// 새로 추가: 특정 시험의 문제 목록 조회
+export const getProblemsByTestId = async (testId: number) => {
+    // db 클라이언트 열기
+    const db = await openDatabase();
+    // sql 쿼리 작성 (변수는 ?로 정의)
+    const sql = `SELECT problem_id, test_id, type, number, content, figure, options, correct_answer, selected_answer FROM Problems WHERE test_id = ? ORDER BY number ASC`;
+    // testId를 변수로 받아서 sql 쿼리를 완성, 쿼리 실행
+    const res = await db.executeSql(sql, [testId]);
+    // 결과 값 받기
+    const rows = res?.[0]?.rows;
+    // 결과 엔티티 정의 (problem 각 엔티티)
+    const items = [] as Array<{
+        problem_id: number;
+        test_id: number;
+        type: string | null;
+        number: number | null;
+        content: string | null;
+        figure: string | null;
+        options: string | null;
+        correct_answer: string | null;
+        selected_answer: string | null;
+    }>;
+    // items 정리
+    for (let i = 0; i < rows.length; i++) {
+        items.push(rows.item(i));
+    }
+    return items;
+};

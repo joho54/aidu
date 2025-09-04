@@ -115,7 +115,7 @@ export default function useAnalyzeService() {
 - #content: 문제 내용
 - #figure: 도형 또는 그림 설명 (없으면 "없음" 또는 비워도 됨)
 - #options: 선택지가 있으면 선택지 목록, 없으면 "없음" 또는 비워도 됨
-- #correct_answer: 정답 내용을 정리
+- #correct_answer: 정답 내용. 
 - #selected_answer: 사용자의 응답을 정리, 없으면 "없음" 또는 비워도 됨
 
 예시)
@@ -126,8 +126,8 @@ export default function useAnalyzeService() {
 #content: 이차방정식의 근을 구하시오.
 #figure: 없음
 #options: ① 1, ② -1, ③ 0, ④ 2, ⑤ -2
-#correct_answer: ②
-#selected_answer: ③
+#correct_answer: ② -1
+#selected_answer: ③ 0
 
 #type: essay
 #number: 2
