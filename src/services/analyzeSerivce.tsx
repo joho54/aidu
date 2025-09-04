@@ -67,6 +67,16 @@ export default function useAnalyzeService() {
             currentProblem.content = value;
             break;
           }
+          case 'correct_answer' : {
+            if (!currentProblem) currentProblem = {};
+            currentProblem.correct_answer = value;
+            break
+          }
+          case 'selected_answer' : {
+            if (!currentProblem) currentProblem = {};
+            currentProblem.selected_answer =value === '없음' || value === '' ? null : value;
+            break
+          }
           case 'figure': {
             if (!currentProblem) currentProblem = {};
             currentProblem.figure = value === '없음' || value === '' ? null : value;
@@ -105,6 +115,8 @@ export default function useAnalyzeService() {
 - #content: 문제 내용
 - #figure: 도형 또는 그림 설명 (없으면 "없음" 또는 비워도 됨)
 - #options: 선택지가 있으면 선택지 목록, 없으면 "없음" 또는 비워도 됨
+- #correct_answer: 정답 내용을 정리
+- #selected_answer: 사용자의 응답을 정리, 없으면 "없음" 또는 비워도 됨
 
 예시)
 #test_name: 수학 기초 시험
@@ -114,12 +126,16 @@ export default function useAnalyzeService() {
 #content: 이차방정식의 근을 구하시오.
 #figure: 없음
 #options: ① 1, ② -1, ③ 0, ④ 2, ⑤ -2
+#correct_answer: ②
+#selected_answer: ③
 
 #type: essay
 #number: 2
 #content: 함수의 정의역과 치역을 설명하시오.
 #figure: 없음
 #options: 없음
+#correct_answer: 정의역은 함수에 입력할 수 있는 값들의 모임이고, 치역은 함수가 출력할 수 있는 실제 값들의 모임이다. 
+#selected_answer: 정의역은 x, 치역은 y입니다.
 `
 
     try {

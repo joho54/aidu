@@ -47,6 +47,8 @@ export default function HomeScreen() {
                             <Text>내용: {problem.content}</Text>
                             <Text>도형: {problem.figure ?? '없음'}</Text>
                             <Text>선택지: {problem.options ?? '없음'}</Text>
+                            <Text>정답: {problem.correct_answer} </Text>
+                            <Text>선택: {problem.selected_answer ?? '없음'} </Text>
                         </View>
                     ))}
                 </View>

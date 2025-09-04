@@ -9,9 +9,9 @@ SQLite.enablePromise(true); // 프로미스 방식 활성화
 type DB = Awaited<ReturnType<typeof SQLite.openDatabase>>;
 
 export const openDatabase = async () => {
-    console.log('DB 파일 경로:', RNFS.DocumentDirectoryPath + '/app.db');
+    console.log('DB 파일 경로:', RNFS.DocumentDirectoryPath + '/app_v2.db');
     try {
-        const db = await SQLite.openDatabase({ name: 'app.db', location: 'default' });
+        const db = await SQLite.openDatabase({ name: 'app_v2.db', location: 'default' });
         return db;
     } catch (error) {
         console.error('DB 오픈 실패:', error);
@@ -21,23 +21,28 @@ export const openDatabase = async () => {
 
 export const createTables = async (db: DB) => {
     try {
+        await db.executeSql('PRAGMA foreign_keys = ON;');
         await db.executeSql(`
       CREATE TABLE IF NOT EXISTS Tests (
         test_id INTEGER PRIMARY KEY,
-        test_name TEXT NOT NULL
+        test_name TEXT NOT NULL,
+        total_problems INTEGER NOT NULL DEFAULT 0,
+        correct_problems INTEGER NOT NULL DEFAULT 0
       );
     `);
 
         await db.executeSql(`
       CREATE TABLE IF NOT EXISTS Problems (
         problem_id INTEGER PRIMARY KEY,
-        test_id INTEGER,
+        test_id INTEGER NOT NULL,
         type TEXT,
         number INTEGER,
         content TEXT,
         figure TEXT,
         options TEXT,
-        FOREIGN KEY (test_id) REFERENCES Tests(test_id)
+        correct_answer TEXT,
+        selected_answer TEXT,
+        FOREIGN KEY (test_id) REFERENCES Tests(test_id) ON DELETE CASCADE
       );
     `);
     } catch (error) {
@@ -51,6 +56,18 @@ export const saveParseResult = async (parseResult: ParseResultDTO) => {
         const test = parseResult.test;
         const problems = parseResult.problems;
 
+        // 자동 채점 결과 계산
+        const totalProblems = Array.isArray(problems) ? problems.length : 0;
+        const correctProblems = Array.isArray(problems)
+            ? problems.reduce((count, p) => {
+                const correct = (p.correct_answer ?? '').trim();
+                const selected = (p.selected_answer ?? '').trim();
+                return count + (correct.length > 0 && selected.length > 0 && correct === selected ? 1 : 0);
+            }, 0)
+            : 0;
+        test.total_problems = totalProblems;
+        test.correct_problems = correctProblems;
+
         if (!test || !test.test_name) {
             throw new Error('시험 정보가 없습니다.');
         }
@@ -61,8 +78,8 @@ export const saveParseResult = async (parseResult: ParseResultDTO) => {
         const db = await openDatabase();
 
         // 시험 저장
-        const insertTestSql = 'INSERT INTO Tests (test_name) VALUES (?);';
-        const testResult = await db.executeSql(insertTestSql, [test.test_name]);
+        const insertTestSql = 'INSERT INTO Tests (test_name, total_problems, correct_problems) VALUES (?, ?, ?);';
+        const testResult = await db.executeSql(insertTestSql, [test.test_name, test.total_problems, test.correct_problems]);
         const insertedTestId = testResult?.[0]?.insertId;
         console.log('[DB] Tests insert result:', testResult?.[0]);
 
@@ -72,8 +89,8 @@ export const saveParseResult = async (parseResult: ParseResultDTO) => {
 
         // 문제 저장
         const insertProblemSql = `
-                INSERT INTO Problems (test_id, type, number, content, figure, options)
-                VALUES (?, ?, ?, ?, ?, ?);
+                INSERT INTO Problems (test_id, type, number, content, figure, options, correct_answer, selected_answer)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?);
             `;
 
         for (const problem of problems) {
@@ -83,6 +100,8 @@ export const saveParseResult = async (parseResult: ParseResultDTO) => {
                 const content = problem.content;
                 const figure = problem.figure ?? null;
                 const options = problem.options ?? null;
+                const correct_answer = problem.correct_answer;
+                const selected_answer = problem.selected_answer ?? null;
 
                 if (!type || Number.isNaN(number) || !content) {
                     console.warn('[DB] 유효하지 않은 문제 데이터로 인해 건너뜀:', problem);
@@ -98,6 +117,8 @@ export const saveParseResult = async (parseResult: ParseResultDTO) => {
                         content,
                         figure,
                         options,
+                        correct_answer,
+                        selected_answer
                     ]
                 );
                 const rowsAffected = res?.[0]?.rowsAffected;
