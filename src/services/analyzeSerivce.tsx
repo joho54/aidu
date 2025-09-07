@@ -4,6 +4,7 @@ import { ProblemDTO } from "../DTO/ProblemDTO";
 import parseErrorStack from "react-native/Libraries/Core/Devtools/parseErrorStack";
 import { Alert } from "react-native";
 import { ParseResultDTO } from "../DTO/ParseResultDTO";
+import Config from 'react-native-config';
 
 export default function useAnalyzeService() {
 
@@ -140,7 +141,8 @@ export default function useAnalyzeService() {
 
     try {
       setIsAnalyzing(true);
-      const response = await fetch('http://localhost:8000/analyze-image', {
+      const apiBaseUrl = Config.API_BASE_URL || 'http://localhost:8000';
+      const response = await fetch(`${apiBaseUrl}/analyze-image`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

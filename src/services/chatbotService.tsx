@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Config from 'react-native-config';
 
 export interface Message {
     role: 'user' | 'assistant' | 'system';
@@ -28,7 +29,8 @@ export const useChatbotService = () => {
 
             // 응답 받기. updated message로 전송. 
             // 백엔드 서버로 목적지 교체 -> 기존 분석 함수를 참조해서 구현해보기.
-            const response = await fetch('http://localhost:8000/chatbot', {
+            const apiBaseUrl = Config.API_BASE_URL || 'http://localhost:8000';
+            const response = await fetch(`${apiBaseUrl}/chatbot`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
