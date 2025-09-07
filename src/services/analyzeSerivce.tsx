@@ -115,8 +115,8 @@ export default function useAnalyzeService() {
 - #content: 문제 내용
 - #figure: 도형 또는 그림 설명 (없으면 "없음" 또는 비워도 됨)
 - #options: 선택지가 있으면 선택지 목록, 없으면 "없음" 또는 비워도 됨
-- #correct_answer: 정답 내용. 
-- #selected_answer: 사용자의 응답을 정리, 없으면 "없음" 또는 비워도 됨
+- #selected_answer: 사용자의 응답을 작성, 없으면 "없음" 또는 비워도 됨
+- #correct_answer: 정답을 기제. 만약 주관식일 경우, selected_answer가 적절하면 동일한 내용을 복사하기.
 
 예시)
 #test_name: 수학 기초 시험

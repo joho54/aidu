@@ -1,19 +1,49 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import { View, Text, FlatList, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
 import { useChatbotService } from "../services/chatbotService";
+import { getProblemById } from "../services/databaseService";
+import { ProblemDTO } from "../DTO/ProblemDTO";
+import { useRoute } from "@react-navigation/native";
 
 export default function ChatScreen() {
     const { messages, sendMessage, loading, error } = useChatbotService();
     const [input, setInput] = useState("");
     const listRef = useRef<FlatList<any>>(null);
-
+    const [question, setQuestion] = useState<ProblemDTO | null>(null); // DEBUG: 참조 스테이트들은 null 값을 허용해줘야 함.
+    const { problemId } = useRoute().params as { problemId: number };
     const canSend = useMemo(() => input.trim().length > 0 && !loading, [input, loading]);
+
+    const visibleMessages = useMemo(() => messages.filter(m => m.role !== 'system'), [messages]);
+
+    const formInitialQuery = useCallback((q: ProblemDTO) => {
+        const query = `#문제 관련 질의응답 요청 \n유형: ${q.type}\n 내용: ${q.content} \n추가 자료: ${q.figure} \n선택지: ${q.options} \n나의 선택: ${q.selected_answer} \n응답 양식: <문제의 간략한 설명>. <실제 정답과 사용자의 선택 비교>`;
+        return query;
+    }, []);
+
+    useEffect(() => {
+        let mounted = true;
+        (async () => {
+            try {
+                const data = await getProblemById(problemId);
+                const normalized = data?.[0];
+                if (!mounted || normalized == null) return;
+                setQuestion(normalized);
+                const initialQuery = formInitialQuery(normalized);
+                await sendMessage(initialQuery, 'system');
+            } catch (e) {
+                // noop
+            }
+        })();
+        return () => {
+            mounted = false;
+        };
+    }, [problemId]);
 
     const onPressSend = useCallback(async () => {
         const text = input.trim();
         if (!text) return;
         setInput("");
-        await sendMessage(text);
+        await sendMessage(text, 'user');
         // 자동 스크롤
         requestAnimationFrame(() => {
             listRef.current?.scrollToEnd({ animated: true });
@@ -22,9 +52,13 @@ export default function ChatScreen() {
 
     const renderItem = useCallback(({ item }: { item: any }) => {
         const content: string = item?.content ?? "";
+        const isUser = item?.role === "user";
         return (
-            <View style={styles.messageRow}>
-                <View style={styles.messageBubble}>
+            <View style={[styles.messageRow]}>
+                <View style={[
+                    styles.messageBubble,
+                    isUser ? styles.messageBubbleRight : styles.messageBubbleLeft
+                ]}>
                     <Text style={styles.messageText}>{content}</Text>
                 </View>
             </View>
@@ -38,7 +72,7 @@ export default function ChatScreen() {
             <View style={styles.listContainer}>
                 <FlatList
                     ref={listRef}
-                    data={messages}
+                    data={visibleMessages}
                     renderItem={renderItem}
                     keyExtractor={keyExtractor}
                     contentContainerStyle={styles.listContent}
@@ -89,4 +123,7 @@ const styles = StyleSheet.create({
     loadingOverlay: { position: "absolute", bottom: 56, alignSelf: "center", padding: 6, borderRadius: 8 },
     errorBox: { position: "absolute", bottom: 56, left: 16, right: 16, backgroundColor: "#fdecea", borderColor: "#f5c6cb", borderWidth: 1, padding: 8, borderRadius: 8 },
     errorText: { color: "#b71c1c" },
+    // alignment variants
+    messageBubbleLeft: { marginRight: "auto" },
+    messageBubbleRight: { marginLeft: "auto", backgroundColor: "#d7ebff" },
 });

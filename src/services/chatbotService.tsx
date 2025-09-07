@@ -15,13 +15,13 @@ export const useChatbotService = () => {
     const [error, setError] = useState<string | null>(null);
 
     // 메시지 전송 함수
-    const sendMessage = async (userMessage: string) => {
+    const sendMessage = async (userMessage: string, role: 'user' | 'assistant' | 'system') => {
         // 상태 관리
         setLoading(true);
         setError(null);
         try {
             // 인자값으로 넘어온 메시지를 updatedMessages에 추가
-            const updatedMessages: Message[] = [...messages, { role: 'user', content: userMessage }];
+            const updatedMessages: Message[] = [...messages, { role: role, content: userMessage }];
             // message state 설정
             setMessages(updatedMessages);
             console.log(updatedMessages)

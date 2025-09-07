@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { View, Button, Image, Text, ScrollView, Alert } from "react-native";
+import { View, Button, Image, Text, ScrollView, Alert, StyleSheet } from "react-native";
 import { launchImageLibrary, Asset } from "react-native-image-picker";
 import { DataInputType, getText } from 'rn-ocr-lib'
 import useAnalyzeService from "../services/analyzeSerivce"; // DEBUG: {useAnalyzeService} -> useAnalyzeService. default export 방식은 이렇게 해야함.
 import { useImagePicker } from "../hooks/useImagePicker";
 import { saveParseResult } from "../services/databaseService";
-
+import { BottomTabBarHeightCallbackContext } from "@react-navigation/bottom-tabs";
 
 export default function HomeScreen() {
     const [processedText, setProcessedText] = useState('');
@@ -13,11 +13,11 @@ export default function HomeScreen() {
     const { analyzeImage, analysisResult, isAnalyzing, parseResult } = useAnalyzeService();
 
     return (
-        <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 100 }}>
+        <ScrollView contentContainerStyle={styles.container}>
             <Button title="이미지 선택" onPress={pickImage} />
 
             {base64Data && (
-                <View style={{ marginTop: 20 }}>
+                <View style={styles.container}>
                     <Button
                         title={isAnalyzing ? "분석 중..." : "LLM으로 이미지 분석"}
                         onPress={() => analyzeImage(base64Data)}
@@ -27,16 +27,16 @@ export default function HomeScreen() {
             )}
 
             {imageUri && (
-                <View style={{ marginTop: 20 }}>
+                <View style={styles.container}>
                     <Image
                         source={{ uri: imageUri }}
-                        style={{ width: 300, height: 300, marginTop: 10 }}
+                        style={styles.image}
                         resizeMode="contain"
                     />
                 </View>
             )}
 
-            <View style={{ marginTop: 20 }}>
+            <View style={styles.container}>
                 <Text>LLM 분석 결과:</Text>
                 <View>
                     <Text>테스트 이름: {parseResult?.test?.test_name}</Text>
@@ -45,7 +45,7 @@ export default function HomeScreen() {
                             <Text>문제 번호: {problem.number}</Text>
                             <Text>유형: {problem.type}</Text>
                             <Text>내용: {problem.content}</Text>
-                            <Text>도형: {problem.figure ?? '없음'}</Text>
+                            <Text>추가자료: {problem.figure ?? '없음'}</Text>
                             <Text>선택지: {problem.options ?? '없음'}</Text>
                             <Text>정답: {problem.correct_answer} </Text>
                             <Text>선택: {problem.selected_answer ?? '없음'} </Text>
@@ -70,3 +70,7 @@ export default function HomeScreen() {
     );
 }
 
+const styles = StyleSheet.create({
+    image: { alignSelf: 'center', width: 300, height: 300 },
+    container: {marginTop: 2, borderWidth: 2, borderColor: 'black'}
+})

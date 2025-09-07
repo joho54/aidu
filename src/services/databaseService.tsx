@@ -2,7 +2,7 @@
 import SQLite from 'react-native-sqlite-storage';
 import { ParseResultDTO } from '../DTO/ParseResultDTO';
 import RNFS from 'react-native-fs';
-import {Alert} from 'react-native'
+import { Alert } from 'react-native'
 
 SQLite.enablePromise(true); // 프로미스 방식 활성화
 
@@ -140,11 +140,11 @@ export const saveParseResult = async (parseResult: ParseResultDTO) => {
 }
 
 // 새로 추가: 저장된 시험 목록 조회
-export const getAllTests = async () => { 
+export const getAllTests = async () => {
     // db 객체 열기 (클라이언트랑 비슷한 느낌. 하지만 다름)
     const db = await openDatabase();
     // sql 쿼리 
-    const sql = 'SELECT test_id, test_name, total_problems, correct_problems FROM Tests ORDER BY test_id DESC';
+    const sql = 'SELECT test_id, test_name, total_problems, correct_problems FROM Tests ORDER BY test_id ASC';
     // db 클라이언트를 통해 쿼리를 날리고 응답을 받음.
     const res = await db.executeSql(sql);
     // 결과 배열의 첫 번째 요소에 rows가 포함되기 때문
@@ -186,3 +186,27 @@ export const getProblemsByTestId = async (testId: number) => {
     }
     return items;
 };
+
+export const getProblemById = async (problemId: number) => {
+    const db = await openDatabase();
+    const sql = `SELECT * FROM Problems WHERE problem_id = ?`;
+    const res = await db.executeSql(sql, [problemId]);
+    const rows = res?.[0]?.rows;
+    // 결과 엔티티 정의 (problem 각 엔티티)
+    const item = [] as Array<{
+        problem_id: number;
+        test_id: number;
+        type: string | null;
+        number: number | null;
+        content: string | null;
+        figure: string | null;
+        options: string | null;
+        correct_answer: string | null;
+        selected_answer: string | null;
+    }>;
+     // items 정리
+     for (let i = 0; i < rows.length; i++) {
+        item.push(rows.item(i));
+    }
+    return item;
+}
