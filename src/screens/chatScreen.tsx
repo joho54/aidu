@@ -9,7 +9,7 @@ export default function ChatScreen() {
     const { messages, sendMessage, loading, error } = useChatbotService();
     const [input, setInput] = useState("");
     const listRef = useRef<FlatList<any>>(null);
-    const [question, setQuestion] = useState<ProblemDTO | null>(null); // DEBUG: 참조 스테이트들은 null 값을 허용해줘야 함.
+    const [problem, setProblem] = useState<ProblemDTO | null>(null); // DEBUG: 참조 스테이트들은 null 값을 허용해줘야 함.
     const { problemId } = useRoute().params as { problemId: number };
     const canSend = useMemo(() => input.trim().length > 0 && !loading, [input, loading]);
 
@@ -61,7 +61,7 @@ ${problem.correct_answer || '정답 정보 없음'}
                 const data = await getProblemById(problemId);
                 const normalized = data?.[0];
                 if (!mounted || normalized == null) return;
-                setQuestion(normalized);
+                setProblem(normalized);
                 const initialQuery = formInitialQuery(normalized);
                 await sendMessage(initialQuery, 'system');
             } catch (e) {

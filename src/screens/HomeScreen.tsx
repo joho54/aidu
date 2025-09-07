@@ -4,7 +4,7 @@ import { DataInputType, getText } from 'rn-ocr-lib'
 import useAnalyzeService from "../services/analyzeSerivce";
 import { useImagePicker } from "../hooks/useImagePicker";
 import { saveParseResult } from "../services/databaseService";
-import Question from "../components/Question";
+import Problem from "../components/Problem";
 import ImagePicker from "../components/ImagePicker";
 import Button from "../components/Button";
 
@@ -62,7 +62,7 @@ export default function HomeScreen() {
                     </Text>
 
                     {parseResult.problems.map((problem, idx) => (
-                        <Question key={idx} problem={problem} />
+                        <Problem key={idx} problem={problem} />
                     ))}
                 </View>
             )}

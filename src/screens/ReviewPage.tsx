@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, Button } from 'reac
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
 import { getProblemsByTestId } from '../services/databaseService';
-import Question from '../components/Question';
+import Problem from '../components/Problem';
 
 const equalsIgnoringWhitespace = (a?: string | null, b?: string | null) => {
   const normalize = (s: string | null | undefined) => (s ?? '').replace(/\s+/g, '');
@@ -61,7 +61,7 @@ export default function ReviewPage() {
         renderItem={({ item }) => (
           <View style={styles.item}>
             <View>
-              <Question problem={item}></Question>
+              <Problem problem={item}></Problem>
               <TouchableOpacity
                 onPress={() => navigation.navigate('Chat', { problemId: item.problem_id })} // DEBUG: 그냥 컴마 찍고 넘기면 안 되고 키 벨류 값으로 넘겨줘야 함.
                 accessibilityRole="button"

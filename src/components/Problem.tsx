@@ -2,11 +2,11 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { ProblemDTO } from '../DTO/ProblemDTO';
 
-interface QuestionProps {
+interface ProblemProps {
   problem: ProblemDTO;
 }
 
-export default function Question({ problem }: QuestionProps) {
+export default function Problem({ problem }: ProblemProps) {
   const isCorrect = problem.correct_answer === problem.selected_answer;
   const cardStyle = isCorrect ? styles.correctCard : styles.incorrectCard;
 
