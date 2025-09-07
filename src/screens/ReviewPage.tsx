@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, Button } from 'reac
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
 import { getProblemsByTestId } from '../services/databaseService';
+import Question from '../components/Question';
 
 const equalsIgnoringWhitespace = (a?: string | null, b?: string | null) => {
   const normalize = (s: string | null | undefined) => (s ?? '').replace(/\s+/g, '');
@@ -60,15 +61,14 @@ export default function ReviewPage() {
         renderItem={({ item }) => (
           <View style={styles.item}>
             <View>
-              <Text style={styles.itemTitle}>{item.number}. {item.content}</Text>
-              <Text style={styles.itemMeta}>정답: {item.correct_answer ?? '-'} | 선택: {item.selected_answer ?? '-'}</Text>
+              <Question problem={item}></Question>
               <TouchableOpacity
                 onPress={() => navigation.navigate('Chat', { problemId: item.problem_id })} // DEBUG: 그냥 컴마 찍고 넘기면 안 되고 키 벨류 값으로 넘겨줘야 함.
                 accessibilityRole="button"
                 accessibilityLabel="채팅 열기"
                 style={{ marginTop: 8, alignSelf: 'flex-start', paddingVertical: 6, paddingHorizontal: 10, borderRadius: 6, backgroundColor: '#e8f0fe' }}
               >
-                <Text style={{ fontSize: 16 }}>💬</Text>
+                <Text style={{ fontSize: 16 }}>💬 챗봇에게 물어보기</Text>
               </TouchableOpacity>
             </View>
           </View>

@@ -15,8 +15,42 @@ export default function ChatScreen() {
 
     const visibleMessages = useMemo(() => messages.filter(m => m.role !== 'system'), [messages]);
 
-    const formInitialQuery = useCallback((q: ProblemDTO) => {
-        const query = `#문제 관련 질의응답 요청 \n유형: ${q.type}\n 내용: ${q.content} \n추가 자료: ${q.figure} \n선택지: ${q.options} \n나의 선택: ${q.selected_answer} \n응답 양식: <문제의 간략한 설명>. <실제 정답과 사용자의 선택 비교>`;
+    const formInitialQuery = useCallback((q: any) => {
+        // 데이터베이스에서 가져온 데이터를 ProblemDTO 형태로 변환
+        const problem: ProblemDTO = {
+            type: (q.type === 'essay' || q.type === 'multiple_choices') ? q.type : 'multiple_choices',
+            number: q.number || 0,
+            content: q.content || '',
+            figure: q.figure,
+            options: q.options,
+            correct_answer: q.correct_answer,
+            selected_answer: q.selected_answer
+        };
+
+        const query = `당신은 교육용 AI 튜터입니다. 학생이 문제를 풀고 답안을 제출했으니, 상세하고 도움이 되는 피드백을 제공해주세요.
+
+**문제 정보:**
+- 문제 유형: ${problem.type === 'essay' ? '서술형' : '객관식'}
+- 문제 번호: ${problem.number}
+- 문제 내용: ${problem.content}
+${problem.figure ? `- 추가 자료: ${problem.figure}` : ''}
+${problem.options ? `- 선택지: ${problem.options}` : ''}
+
+**학생의 답안:**
+${problem.selected_answer || '답안 없음'}
+
+**정답:**
+${problem.correct_answer || '정답 정보 없음'}
+
+**피드백 요청사항:**
+1. 문제의 핵심 개념과 해결 방법을 간단히 설명해주세요
+2. 학생의 답안이 정답인지 확인하고, 틀렸다면 왜 틀렸는지 구체적으로 설명해주세요
+3. 정답에 도달하는 과정을 단계별로 안내해주세요
+4. 유사한 문제를 해결할 때 주의할 점이나 팁을 제공해주세요
+5. 격려의 말씀도 포함해주세요
+
+답변은 친근하고 이해하기 쉽게 작성해주세요.`;
+
         return query;
     }, []);
 

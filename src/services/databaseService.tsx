@@ -128,8 +128,6 @@ export const saveParseResult = async (parseResult: ParseResultDTO) => {
                 throw err; // 중단하여 상위에서 처리 (부분 저장 방지)
             }
         }
-
-        Alert.alert('파싱 저장 성공');
         return { test, problems };
     }
     catch (error) {

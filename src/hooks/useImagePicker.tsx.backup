@@ -5,7 +5,7 @@ export const useImagePicker = () => {
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [base64Data, setBase64Data] = useState<string | null>(null);
 
-  const pickImage = (onImageSelected?: (base64: string) => void) => {
+  const pickImage = () => {
     launchImageLibrary(
       {
         mediaType: 'photo',
@@ -23,11 +23,6 @@ export const useImagePicker = () => {
           const asset: Asset = response.assets[0];
           setImageUri(asset.uri ?? null);
           setBase64Data(asset.base64 ?? null);
-          
-          // 이미지 선택 완료 시 자동으로 분석 시작
-          if (asset.base64 && onImageSelected) {
-            onImageSelected(asset.base64);
-          }
         }
       }
     );

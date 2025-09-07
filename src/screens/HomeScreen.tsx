@@ -1,76 +1,153 @@
 import React, { useEffect, useState } from "react";
-import { View, Button, Image, Text, ScrollView, Alert, StyleSheet } from "react-native";
-import { launchImageLibrary, Asset } from "react-native-image-picker";
+import { View, Image, Text, ScrollView, Alert, StyleSheet, TouchableOpacity } from "react-native";
 import { DataInputType, getText } from 'rn-ocr-lib'
-import useAnalyzeService from "../services/analyzeSerivce"; // DEBUG: {useAnalyzeService} -> useAnalyzeService. default export 방식은 이렇게 해야함.
+import useAnalyzeService from "../services/analyzeSerivce";
 import { useImagePicker } from "../hooks/useImagePicker";
 import { saveParseResult } from "../services/databaseService";
-import { BottomTabBarHeightCallbackContext } from "@react-navigation/bottom-tabs";
+import Question from "../components/Question";
+import ImagePicker from "../components/ImagePicker";
+import Button from "../components/Button";
 
 export default function HomeScreen() {
     const [processedText, setProcessedText] = useState('');
     const { imageUri, base64Data, pickImage } = useImagePicker();
     const { analyzeImage, analysisResult, isAnalyzing, parseResult } = useAnalyzeService();
 
+    const handleImageSelected = (base64: string) => {
+        // 이미지 선택 완료 시 자동으로 LLM 분석 시작
+        analyzeImage(base64);
+    };
+
+    const handleSaveTest = () => {
+        if (parseResult) {
+            saveParseResult(parseResult);
+            Alert.alert('성공', '시험이 저장되었습니다.');
+        } else {
+            Alert.alert('오류', '분석 결과가 없습니다.');
+        }
+    };
+
     return (
         <ScrollView contentContainerStyle={styles.container}>
-            <Button title="이미지 선택" onPress={pickImage} />
+            <View style={styles.header}>
+                <Text style={styles.title}>Aidu</Text>
+            </View>
 
-            {base64Data && (
-                <View style={styles.container}>
-                    <Button
-                        title={isAnalyzing ? "분석 중..." : "LLM으로 이미지 분석"}
-                        onPress={() => analyzeImage(base64Data)}
-                        disabled={isAnalyzing}
-                    />
+            {!imageUri ? (
+                <View style={styles.imagePickerContainer}>
+                    <ImagePicker onPress={() => pickImage(handleImageSelected)} />
+                </View>
+            ) : (
+
+                <View style={styles.imageContainer}>
+                    <TouchableOpacity onPress={() => pickImage(handleImageSelected)}>
+                        <Image
+                            source={{ uri: imageUri }}
+                            style={styles.image}
+                            resizeMode="contain"
+                        />
+                        {isAnalyzing && (
+                            <View style={styles.analyzingOverlay}>
+                                <Text style={styles.analyzingText}>분석 중...</Text>
+                            </View>
+                        )}
+                    </TouchableOpacity>
                 </View>
             )}
 
-            {imageUri && (
-                <View style={styles.container}>
-                    <Image
-                        source={{ uri: imageUri }}
-                        style={styles.image}
-                        resizeMode="contain"
-                    />
-                </View>
-            )}
+            {parseResult && (
+                <View style={styles.resultsContainer}>
+                    <Text style={styles.resultsTitle}>
+                        {parseResult.test.test_name}
+                    </Text>
 
-            <View style={styles.container}>
-                <Text>LLM 분석 결과:</Text>
-                <View>
-                    <Text>테스트 이름: {parseResult?.test?.test_name}</Text>
-                    {parseResult?.problems?.map((problem, idx) => (
-                        <View key={idx}>
-                            <Text>문제 번호: {problem.number}</Text>
-                            <Text>유형: {problem.type}</Text>
-                            <Text>내용: {problem.content}</Text>
-                            <Text>추가자료: {problem.figure ?? '없음'}</Text>
-                            <Text>선택지: {problem.options ?? '없음'}</Text>
-                            <Text>정답: {problem.correct_answer} </Text>
-                            <Text>선택: {problem.selected_answer ?? '없음'} </Text>
-                        </View>
+                    {parseResult.problems.map((problem, idx) => (
+                        <Question key={idx} problem={problem} />
                     ))}
                 </View>
-            </View>
-            <View>
-                <Button
-                    title={'시험 저장하기'}
-                    onPress={() => {
-                        if (parseResult) {
-                            saveParseResult(parseResult);
-                        } else {
-                            Alert.alert('분석 결과가 없습니다.');
-                        }
-                    }}
-                    disabled={!parseResult}
-                />
-            </View>
+            )}
+
+            {parseResult && (
+                <View style={styles.saveButtonContainer}>
+                    <Button
+                        title="시험 저장하기"
+                        onPress={handleSaveTest}
+                    />
+                </View>
+            )}
         </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
-    image: { alignSelf: 'center', width: 300, height: 300 },
-    container: {marginTop: 2, borderWidth: 2, borderColor: 'black'}
-})
+    container: {
+        flexGrow: 1,
+        backgroundColor: '#F5F5F5',
+        paddingBottom: 20,
+    },
+    header: {
+        backgroundColor: '#007AFF',
+        paddingVertical: 20,
+        paddingHorizontal: 16,
+        alignItems: 'center',
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: 'white',
+    },
+    imagePickerContainer: {
+        alignItems: 'center',
+        paddingVertical: 40,
+    },
+    imageContainer: {
+        alignItems: 'center',
+        marginVertical: 20,
+        position: 'relative',
+    },
+    image: {
+        width: 300,
+        height: 300,
+        borderRadius: 12,
+        backgroundColor: 'white',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    analyzingOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    analyzingText: {
+        color: 'white',
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    resultsContainer: {
+        marginTop: 20,
+        paddingHorizontal: 16,
+    },
+    resultsTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 16,
+        textAlign: 'center',
+    },
+    saveButtonContainer: {
+        marginTop: 20,
+        paddingHorizontal: 16,
+    },
+});
